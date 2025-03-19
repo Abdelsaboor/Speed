@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #c7d5e0;
+            padding: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        header {
+            background-color: #171a21;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f466d3;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        header .nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        header .nav a {
+            text-decoration: none;
+            color: #9f16d1;
+            transition: color 0.3s;
+        }
+
+        header .nav a:hover {
+            color: #f4669f;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: rgba(30, 27, 27, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(45deg, #fd2200, rgb(255, 0, 238), rgb(0, 0, 255));
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input {
+            margin: 5px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(45deg, blue, red);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, red, blue);
+            transform: scale(1.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #000000;
+        }
+
+        .game-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+
+        .actions button {
+            background: #fd2200;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .actions button:hover {
+            background: #ff5733;
+        }
+
+        #updateGameForm {
+            display: none; /* Hide update form initially */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Admin - Manage Games</div>
+        <nav class="nav">
+            <a href="/home">Home</a>
+            <a href="/admin">Admin Panel</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Manage Games</h1>
+
+        <!-- شريط البحث -->
+        <form id="searchForm">
+            <input type="text" id="searchQuery" placeholder="Search for games..." />
+            <button type="submit">Search</button>
+        </form>
+
+        <form id="updateGameForm">
+            <h2>Update Game</h2>
+            <input type="hidden" id="updateGameId" />
+            <input type="text" id="updateName" placeholder="Name" required />
+            <input type="text" id="updateDescription" placeholder="Description" required />
+            <input type="number" id="updatePrice" placeholder="Price" required />
+            <input type="text" id="updateImage" placeholder="Image URL" required />
+            <button type="submit">Update Game</button>
+            <button type="button" onclick="hideUpdateForm()">Cancel</button>
+        </form>
+
+        <form id="addGameForm">
+            <h2>Add New Game</h2>
+            <input type="text" id="name" placeholder="Name" required />
+            <input type="text" id="description" placeholder="Description" required />
+            <input type="number" id="price" placeholder="Price" required />
+            <input type="text" id="image" placeholder="Image URL" required />
+            <button type="submit">Add Game</button>
+        </form>
+
+        <h2>Existing Games</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="gamesTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchGames(query = '') {
+            const response = await fetch(`/games?query=${query}`);
+            const games = await response.json();
+            const gamesTable = document.getElementById('gamesTable');
+            gamesTable.innerHTML = '';
+            games.forEach(game => {
+                const row = `
+                    <tr>
+                        <td>${game.name}</td>
+                        <td>${game.description}</td>
+                        <td>$${game.price.toFixed(2)}</td>
+                        <td><img src="${game.image}" class="game-img"></td>
+                        <td class="actions">
+                            <button onclick="editGame('${game._id}', '${game.name}', '${game.description}', '${game.price}', '${game.image}')">Update</button>
+                            <button onclick="deleteGame('${game._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                gamesTable.innerHTML += row;
+            });
+        }
+
+        document.getElementById('searchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = document.getElementById('searchQuery').value;
+            fetchGames(query);
+        });
+
+        function editGame(id, name, description, price, image) {
+            document.getElementById('updateGameForm').style.display = 'block';
+            document.getElementById('updateGameId').value = id;
+            document.getElementById('updateName').value = name;
+            document.getElementById('updateDescription').value = description;
+            document.getElementById('updatePrice').value = price;
+            document.getElementById('updateImage').value = image;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideUpdateForm() {
+            document.getElementById('updateGameForm').style.display = 'none';
+        }
+
+        document.getElementById('updateGameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('updateGameId').value;
+            const name = document.getElementById('updateName').value;
+            const description = document.getElementById('updateDescription').value;
+            const price = document.getElementById('updatePrice').value;
+            const image = document.getElementById('updateImage').value;
+
+            await fetch(`/games/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, price, image })
+            });
+
+            hideUpdateForm();
+            fetchGames();
+        });
+
+        document.getElementById('addGameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const price = document.getElementById('price').value;
+            const image = document.getElementById('image').value;
+
+            await fetch('/games', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, price, image })
+            });
+
+            fetchGames();
+        });
+
+        async function deleteGame(id) {
+            await fetch(`/games/${id}`, { method: 'DELETE' });
+            fetchGames();
+        }
+
+        fetchGames();
+    </script>
+</body>
+</html>

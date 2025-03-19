@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Home</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: rgba(30, 27, 27, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(45deg, #fd2200, rgb(255, 0, 238), rgb(0, 0, 255));
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            color: #ef66f4;
+        }
+
+        .games {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-around;
+        }
+
+        .game {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            width: calc(25% - 20px);
+            min-width: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .game-info {
+            padding: 10px;
+        }
+
+        .game-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #b966f4;
+        }
+
+        .game-info p {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #b8b6b4;
+        }
+
+        .game-info .price {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #b966f4;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #ce64f1;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome to Speed</h1>
+
+        <!-- Featured Games Section -->
+        <div class="section" id="featured">
+            <h2>Featured Games</h2>
+            <div class="games">
+                <!-- سيتم إدراج الألعاب هنا ديناميكيًا -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 Speed. All rights reserved.
+    </footer>
+
+    <script>
+        async function fetchGames() {
+            const response = await fetch('/games'); // جلب الألعاب من الخادم
+            const games = await response.json();
+    
+            const gamesContainer = document.querySelector('#featured .games');
+            gamesContainer.innerHTML = ''; // تنظيف المحتوى القديم
+    
+            games.forEach(game => {
+                const gameCard = `
+                    <div class="game">
+                        <!-- عند الضغط على الصورة، سيتم توجيهك إلى صفحة تفاصيل اللعبة -->
+                        <a href="/game/${game._id}">
+                            <img src="${game.image}" alt="${game.name}">
+                        </a>
+                        <div class="game-info">
+                            <h3>${game.name}</h3>
+                            <p>${game.description}</p>
+                            <div class="price">$${game.price.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+                gamesContainer.innerHTML += gameCard;
+            });
+        }
+    
+        // استدعاء الوظيفة عند تحميل الصفحة
+        fetchGames();
+    </script>
+    
+</body>
+</html>

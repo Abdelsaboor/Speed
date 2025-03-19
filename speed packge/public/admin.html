@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 120vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .container {
+            background-color: rgba(30, 27, 27, 0.7);
+            padding: 30px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h1, h2 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #fd2200, rgb(255, 0, 238), rgb(0, 0, 255));
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        input[type="text"], input[type="password"] {
+            all: unset;
+            color: #fff;
+            border: 1px solid #999797;
+            border-radius: 5px;
+            padding: 10px 20px;
+            background-color: #333;
+        }
+
+        input:is(:focus) {
+            border: 2px solid transparent;
+            transition: all 0.1s ease;
+            background: linear-gradient(#121121, #121121) padding-box,
+                        linear-gradient(45deg, blue, red) border-box;
+        }
+
+        button {
+            background: linear-gradient(45deg, blue, red);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, red, blue);
+            transform: scale(1.05);
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            margin-top: 20px;
+        }
+
+        #userTable {
+            color: #aa488d;
+            background-color: #121121;
+        }
+
+        .search-container input {
+            padding: 8px;
+            width: 50%;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Users Management</h1>
+
+        <!-- نموذج تحديث المستخدم -->
+        <div id="updateUserFormContainer" style="display: none; margin-bottom: 20px;">
+            <h2>Update User</h2>
+            <form id="updateUserForm">
+                <input type="hidden" id="updateUserId" />
+                <input type="text" id="updateUsername" placeholder="New Username" required />
+                <button type="submit">Update</button>
+                <button type="button" onclick="hideUpdateForm()">Cancel</button>
+            </form>
+        </div>
+
+        <!-- نموذج لإضافة مستخدم جديد -->
+        <div class="form-container">
+            <h2>Add New User</h2>
+            <form id="addUserForm">
+                <input type="text" id="username" placeholder="User Name" required />
+                <input type="password" id="password" placeholder="Password" required />
+                <button type="submit">Add</button>
+            </form>
+        </div>
+
+        <!-- شريط البحث -->
+        <div class="search-container">
+            <h2>Search for Username</h2>
+            <input type="text" id="searchQuery" placeholder="Search for user" onkeyup="searchUsers()" />
+        </div>
+
+        <!-- جدول عرض المستخدمين -->
+        <div class="table-container">
+            <h2>User Table</h2>
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Name</th>
+                        <th>Instruction</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = 'http://localhost:3000';
+
+        // جلب المستخدمين وعرضهم
+        async function fetchUsers(query = '') {
+            const response = await fetch(`${apiUrl}/users?query=${query}`);
+            const users = await response.json();
+
+            const tableBody = document.querySelector('#userTable tbody');
+            tableBody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user._id}</td>
+                    <td>${user.username}</td>
+                    <td>
+                        <button onclick="editUser('${user._id}', '${user.username}')">Edit</button>
+                        <button onclick="deleteUser('${user._id}')">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // البحث عن المستخدمين
+        async function searchUsers() {
+            const query = document.getElementById('searchQuery').value;
+            fetchUsers(query);
+        }
+
+        // إضافة مستخدم
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            await fetch(`${apiUrl}/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            document.getElementById('addUserForm').reset();
+            fetchUsers();
+        });
+
+        // فتح نموذج تحديث المستخدم
+        function editUser(id, username) {
+            document.getElementById('updateUserFormContainer').style.display = 'block';
+            document.getElementById('updateUserId').value = id;
+            document.getElementById('updateUsername').value = username;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // إخفاء نموذج التحديث
+        function hideUpdateForm() {
+            document.getElementById('updateUserFormContainer').style.display = 'none';
+        }
+
+        // تحديث مستخدم
+        document.getElementById('updateUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('updateUserId').value;
+            const username = document.getElementById('updateUsername').value;
+
+            await fetch(`${apiUrl}/update/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+
+            hideUpdateForm();
+            fetchUsers();
+        });
+
+        // حذف مستخدم
+        async function deleteUser(id) {
+            await fetch(`${apiUrl}/delete/${id}`, { method: 'DELETE' });
+            fetchUsers();
+        }
+
+        // تحميل المستخدمين عند فتح الصفحة
+        fetchUsers();
+    </script>
+</body>
+</html>

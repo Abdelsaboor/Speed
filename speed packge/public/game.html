@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: rgba(30, 27, 27, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(45deg, #fd2200, rgb(255, 0, 238), rgb(0, 0, 255));
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .game-details {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .game-details img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .game-info {
+            padding: 20px;
+        }
+
+        .game-info h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #b966f4;
+        }
+
+        .game-info p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: #b966f4;
+        }
+
+        .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #b966f4;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #b966f4;
+            font-size: 0.9rem;
+        }
+
+        .back-button {
+            padding: 10px 20px;
+            background-color: #fd2200;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #ff5733;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Game Details</h1>
+
+        <div class="game-details">
+            <img id="gameImage" src="" alt="Game Image">
+            <div class="game-info">
+                <h2 id="gameName"></h2>
+                <p id="gameDescription"></p>
+                <div class="price">$<span id="gamePrice"></span></div>
+            </div>
+
+            <button class="back-button" onclick="window.history.back()">Back to Home</button>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 Speed. All rights reserved.
+    </footer>
+
+    <script>
+        const gameId = window.location.pathname.split('/').pop(); // استخراج الـ ID من الرابط
+
+        async function fetchGameDetails() {
+            const response = await fetch(`/api/game/${gameId}`);
+            const game = await response.json();
+
+            document.getElementById('gameName').innerText = game.name;
+            document.getElementById('gameImage').src = game.image;
+            document.getElementById('gameDescription').innerText = game.description;
+            document.getElementById('gamePrice').innerText = game.price.toFixed(2);
+        }
+
+        fetchGameDetails(); // استدعاء الوظيفة عند تحميل الصفحة
+    </script>
+
+</body>
+</html>

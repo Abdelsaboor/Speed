@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Sign In</title>
+    <!-- رابط إلى CSS مع إضافة رقم إصدار للتخزين المؤقت -->
+    <link rel="stylesheet" href="speed_c.css?version=1.0">
+    <!-- تحميل غير متزامن للـ JS -->
+    <script src="speed_j.js?version=1.0" async></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">
+                <img src="logo1.jpeg" alt="SPEED Logo" class="logo-img" loading="lazy"> SPEED
+            </h1>
+        </div>
+        <div class="signin-box">
+            <h2>SIGN IN</h2>
+            <form action="/login" method="POST">
+                <label for="username">SIGN IN WITH ACCOUNT NAME</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
+                
+                <label for="password">PASSWORD</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+                
+                <div class="remember">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+                
+                <button type="submit" class="btn">Sign In</button>
+                <a href="#" class="forgot">Forgot your password?</a>
+            </form>
+            <div class="qr-code">
+                <h3>Or sign in with QR code</h3>
+                <img src="Qr code.png" alt="QR Code" class="qr-img" loading="lazy">
+            </div> 
+        </div>
+    </div>
+</body>
+</html>
